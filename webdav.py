@@ -78,8 +78,8 @@ def append_to_file(date_time, message_text):
         client.download_sync(remote_path=path, local_path=tmp_file.name)
         doc = Document(tmp_file.name)
     
-    doc.add_paragraph(f'#Время {date_time.strftime("%H:%M:%S")}')
-    doc.add_paragraph(message_text)
+    doc.add_paragraph(f'#Время {date_time.strftime("%H:%M:%S")}\n{message_text}')
+   
 
     with tempfile.NamedTemporaryFile(delete=False) as tmp_file:
         doc.save(tmp_file.name)
