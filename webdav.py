@@ -2,7 +2,8 @@ import re
 from webdav3.client import Client
 from dotenv import load_dotenv
 from os import getenv
-from docx import Document
+import docx
+from docx import Document 
 from datetime import datetime
 import tempfile
 
@@ -65,6 +66,10 @@ def ensure_file_exists(date_time):
     if not client.check(path):
         with tempfile.NamedTemporaryFile(delete=False) as tmp_file:
             doc = Document()
+            styles_element = doc.styles.element
+            rpr_default = styles_element.xpath('./w:docDefaults/w:rPrDefault/w:rPr')[0]
+            lang_default = rpr_default.xpath('w:lang')[0]
+            lang_default.set(docx.oxml.shared.qn('w:val'),'ru-RU')
             doc.save(tmp_file.name)
         client.upload_sync(remote_path=path, local_path=tmp_file.name)
 
@@ -77,8 +82,13 @@ def append_to_file(date_time, message_text):
     with tempfile.NamedTemporaryFile(delete=False) as tmp_file:
         client.download_sync(remote_path=path, local_path=tmp_file.name)
         doc = Document(tmp_file.name)
+        
     
-    doc.add_paragraph(f'#Время {date_time.strftime("%H:%M:%S")}\n{message_text}')
+    paragraph = doc.add_paragraph()
+    run = paragraph.add_run(f'#Время {date_time.strftime("%H:%M:%S")}\n{message_text}')
+    
+    # Устанавливаем язык на русский
+    run.font.lang = 'ru-RU'
    
 
     with tempfile.NamedTemporaryFile(delete=False) as tmp_file:
